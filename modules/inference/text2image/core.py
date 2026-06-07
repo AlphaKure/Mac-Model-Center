@@ -19,7 +19,10 @@ import torch
 class Text2Image:
 
     model = None
+    """Flags"""
     isLoading = False
+    isGenerating = False
+    """Communitcation units"""
     communicationQueue: dict[str, asyncio.Queue] = {} # Use for send process bar
     requestQueue: asyncio.Queue = asyncio.Queue()
     
@@ -45,7 +48,8 @@ class Text2Image:
         cls,
     ):
         """Unload model"""
-
+        if cls.isGenerating:
+            raise BrokenPipeError("Generating... Please wait.")
         del cls.model
         del cls.communicationQueue
         del cls.requestQueue
@@ -69,6 +73,7 @@ class Text2Image:
 
             requestID, requestArg = await cls.requestQueue.get()
             try:
+                cls.isGenerating = True
                 newImage = await asyncio.to_thread(cls.model, callback_on_step_end= partial(_callback, loop, cls.communicationQueue[requestID], requestArg.num_inference_steps) ,**requestArg.model_dump(exclude=["output_path"]))
                 currentTime = datetime.now().strftime('%Y%m%d_%H%M%S')
                 newImage.images[0].save(os.path.join(requestArg.output_path, f"{currentTime}.png"))
@@ -79,6 +84,7 @@ class Text2Image:
                 loop.call_soon_threadsafe(cls.communicationQueue[requestID].put_nowait, None)
             finally:
                 cls.requestQueue.task_done()
+                cls.isGenerating = False
 
     @classmethod
     async def interface(cls, args: RequestArgs):
