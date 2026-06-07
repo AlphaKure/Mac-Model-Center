@@ -69,10 +69,10 @@ class Text2Image:
 
             requestID, requestArg = await cls.requestQueue.get()
             try:
-                newImage = await asyncio.to_thread(cls.model, callback_on_step_end= partial(_callback, loop, cls.communicationQueue[requestID], requestArg.num_inference_steps) ,**requestArg.model_dump(exclude=["outputPath"]))
+                newImage = await asyncio.to_thread(cls.model, callback_on_step_end= partial(_callback, loop, cls.communicationQueue[requestID], requestArg.num_inference_steps) ,**requestArg.model_dump(exclude=["output_path"]))
                 currentTime = datetime.now().strftime('%Y%m%d_%H%M%S')
-                newImage.images[0].save(os.path.join(requestArg.outputPath, f"{currentTime}.png"))
-                loop.call_soon_threadsafe(cls.communicationQueue[requestID].put_nowait, Progress(result= str(os.path.join(requestArg.outputPath, f"{currentTime}.png")), percentage= 100.0, status= "success").dict())
+                newImage.images[0].save(os.path.join(requestArg.output_path, f"{currentTime}.png"))
+                loop.call_soon_threadsafe(cls.communicationQueue[requestID].put_nowait, Progress(result= str(os.path.join(requestArg.output_path, f"{currentTime}.png")), percentage= 100.0, status= "success").dict())
                 loop.call_soon_threadsafe(cls.communicationQueue[requestID].put_nowait, None)
             except Exception as error:
                 loop.call_soon_threadsafe(cls.communicationQueue[requestID].put_nowait, Progress(result= str(error), percentage= 100.0, status= "failed").dict())
