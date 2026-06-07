@@ -17,15 +17,17 @@ class Text2ImageInterface:
         if cls.core.isLoading or cls.core.model is not None:
             return 400, "Request Error", "Already load model or loading "
 
-        async with cls.lock():
+        async with cls.lock:
             
             try:
                 await asyncio.to_thread(cls.core.load_model, loadModelArgs= loadModelArgs)
             except Exception as error:
+                cls.core.isLoading = False
+                cls.core.model = None 
                 return 500, "Model Load Error", str(error)  
 
             try:
-                cls._service = asyncio.create_task(asyncio.to_thread(cls.core._service))
+                cls._service = asyncio.create_task(await asyncio.to_thread(cls.core._service))
             except Exception as error:
                 return 500, "Startup Service Error", str(error)
 
@@ -39,7 +41,7 @@ class Text2ImageInterface:
         if cls.core.isLoading or cls.core.model is None:
             return 400, "Request Error", "Didn't load model or loading "
     
-        async with cls.lock():
+        async with cls.lock:
 
             try:
                 cls.core.unload_model()
@@ -61,6 +63,6 @@ class Text2ImageInterface:
             stream = await cls.core.interface(requestArg)        
         except Exception as error:
             return 500, "Inference Error", str(error)
-        return 200, stream(), None
+        return 200, stream, None
 
 
