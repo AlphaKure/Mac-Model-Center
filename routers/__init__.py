@@ -1,0 +1,1 @@
+from routers.inference.text2image import router as text2image_router
