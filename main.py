@@ -1,9 +1,10 @@
 import routers
+from utils.config import read_config
 
 from fastapi import FastAPI
 
-SERVERHOST= "0.0.0.0"
-SERVERPORT = 8000
+SERVERHOST= read_config(section= "SERVERLET", key="host")
+SERVERPORT = int(read_config(section= "SERVERLET", key="port"))
 
 app = FastAPI(
     docs_url= "/api",
