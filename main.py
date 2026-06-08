@@ -8,7 +8,7 @@ SERVERPORT = int(read_config(section= "SERVERLET", key="port"))
 
 app = FastAPI(
     docs_url= "/api",
-    version= "0.1.0"
+    version= "0.1.1"
 )
 
 app.include_router(routers.text2image_router, prefix="/api")
