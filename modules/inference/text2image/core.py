@@ -105,8 +105,6 @@ class Text2Image:
     @classmethod
     async def interface(cls, args: RequestArgs):
 
-        if cls.model is None:
-            raise BrokenPipeError("Model didn't load.") 
         
         id = uuid4().hex
         tracker = asyncio.Queue()

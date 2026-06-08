@@ -57,6 +57,10 @@ class Text2ImageInterface:
         if Fail:
             Return status code, outline, detail 
         """
+
+        if cls.core.isLoading or cls.core.model is None:
+            return 400, "Request Error", "Didn't load model or loading "
+
         try:
             stream = await cls.core.interface(requestArg)        
         except Exception as error:
@@ -66,6 +70,10 @@ class Text2ImageInterface:
     @classmethod
     async def cancel(cls, requestID: str|None):
         """Interrupt Request"""
+
+        if cls.core.isLoading or cls.core.model is None:
+            return 400, "Request Error", "Didn't load model or loading "
+        
         try:
             cls.core.cancel(requestID)
         except Exception as error:
