@@ -22,8 +22,6 @@ class Text2ImageInterface:
             try:
                 await asyncio.to_thread(cls.core.load_model, loadModelArgs= loadModelArgs)
             except Exception as error:
-                cls.core.isLoading = False
-                cls.core.model = None 
                 return 500, "Model Load Error", str(error)  
 
             try:

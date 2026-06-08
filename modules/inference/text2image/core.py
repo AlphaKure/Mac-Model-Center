@@ -35,13 +35,17 @@ class Text2Image:
 
         cls.isLoading = True
 
-        cls.model = AutoPipelineForText2Image.from_pretrained(
-            loadModelArgs.model_path,
-            torch_dtype = str_to_dtype(loadModelArgs.dtype),
-            trust_remote_code = True,
-        ).to("mps")
-
-        cls.isLoading = False
+        try:
+            cls.model = AutoPipelineForText2Image.from_pretrained(
+                loadModelArgs.model_path,
+                torch_dtype = str_to_dtype(loadModelArgs.dtype),
+                trust_remote_code = True,
+            ).to("mps")
+        except Exception as error:
+            cls.model = None
+            raise Exception(error)
+        finally:
+            cls.isLoading = False
 
     @classmethod 
     def unload_model(
