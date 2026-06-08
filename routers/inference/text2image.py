@@ -30,3 +30,9 @@ async def handle_inference_interface(request: RequestArgs):
         return StreamingResponse(outline, media_type="text/event-stream", status_code= 200)
     else:
         return JSONResponse(BasicResponse(outline= outline, detail= detail).model_dump(), status_code= code)
+
+@router.delete("/inference")
+async def handle_inference_interrupt(id: str|None= None):
+    
+    code, outline, detail = await Text2ImageInterface.cancel(requestID= id)
+    return JSONResponse(BasicResponse(outline= outline, detail= detail).model_dump(), status_code= code)

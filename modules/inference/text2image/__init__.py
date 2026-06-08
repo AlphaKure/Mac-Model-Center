@@ -63,4 +63,11 @@ class Text2ImageInterface:
             return 500, "Inference Error", str(error)
         return 200, stream, None
 
-
+    @classmethod
+    async def cancel(cls, requestID: str|None):
+        """Interrupt Request"""
+        try:
+            cls.core.cancel(requestID)
+        except Exception as error:
+            return 500, "Cancel Error", str(error)
+        return 200, "Success", "Success"

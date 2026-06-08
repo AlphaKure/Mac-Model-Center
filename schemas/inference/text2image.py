@@ -8,6 +8,7 @@ class RequestArgs(BaseModel, extra= "allow"):
     num_inference_steps: int
     guidance_scale: float
     output_path: str
+    seed: int|None = None
 
 class LoadModelArgs(BaseModel):
     model_path: str
