@@ -25,4 +25,6 @@ Only list tested models.
 
 - [Text to Image]
 
-    - Z-Image-Turbo
+    - [Tongyi-MAI/Z-Image-Turbo](https://huggingface.co/Tongyi-MAI/Z-Image-Turbo)
+
+    - [krea/Krea-2-Turbo](https://huggingface.co/krea/Krea-2-Turbo)
