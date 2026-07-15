@@ -1,4 +1,5 @@
 from utils.config import read_config
+from schemas.inference.text2text import LoadModelArgs
 
 import asyncio
 from argparse import Namespace
@@ -11,7 +12,18 @@ from mlx_lm import server
 
 class MlxTextGeneration:
     
-    service = None
+    def __init__(self) -> None:
+        self.service = None
+        self.isLoading = False
+        self.host = read_config("MLX", "host")
+        self.port = read_config("MLX", "port")
+        self.modelTag = ""
+
+        if self.host is None:
+            raise ValueError("MLX host is not configured in config.ini")
+
+        if self.port is None:
+            raise ValueError("MLX port is not configured in config.ini")
 
     @staticmethod
     def _run_server(
@@ -72,62 +84,39 @@ class MlxTextGeneration:
             errorQueue.put(str(error))
 
 
-    @classmethod
     async def load_model(
-        cls,
-        modelPath: str
+        self,
+        loadModelArgs: LoadModelArgs,
     ):
-
-        host = read_config("MLX", "host") 
-        port = read_config("MLX", "port")
-
-        if host is None:
-            raise ValueError("MLX host is not configured in config.ini")
-
-        if port is None:
-            raise ValueError("MLX port is not configured in config.ini")
-        
 
         # Startup servelet
         errorQueue = multiprocessing.Queue()
-        cls.service = multiprocessing.Process(target= cls._run_server, kwargs={"host": host, "port": int(port), "modelPath": modelPath, "errorQueue": errorQueue })
-        cls.service.start()
+        self.isLoading = True
+        self.service = multiprocessing.Process(target= self._run_server, kwargs={"host": self.host, "port": int(self.port), "modelPath": loadModelArgs.modelPath, "errorQueue": errorQueue })
+        self.service.start()
         
         while True:
             # Check Server startup finish or not
             # Check if any error return
             if not errorQueue.empty():
-                cls.service.terminate()
-                cls.service = None
+                self.service.terminate()
+                self.service = None
+                self.isLoading = False
                 raise RuntimeError(f"Server startup error: {errorQueue.get()}") 
 
             try:
-                req = requests.get(f"http://{host}:{port}/v1/models", timeout= 1)
+                req = requests.get(f"http://{self.host}:{self.port}/v1/models", timeout= 1)
                 if req.status_code == 200:
+                    self.isLoading = False
+                    self.modelTag = loadModelArgs.modelPath
                     break
                 raise Exception("Timeout")
             except:
                 await asyncio.sleep(1)
                     
-    @classmethod
-    def unload_model(cls):
+    def unload_model(self):
         
-        if cls.service is not None:
-            cls.service.terminate()
-            cls.service = None
-
-        
-if __name__ == "__main__":
-    """debug"""
-
-    going = True
-    try:
-        asyncio.run(MlxTextGeneration.load_model("/Users/alpha/model/Qwen3"))
-    except Exception as error:
-        going = False
-        print(error)
-
-    if going:
-        input("Next?")
-        MlxTextGeneration.unload_model()
-        input("Next?")
+        if self.service is not None:
+            self.service.terminate()
+            self.service = None
+            self.modelTag = ""
