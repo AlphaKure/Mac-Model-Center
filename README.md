@@ -12,7 +12,12 @@ git clone https://github.com/AlphaKure/Mac-Model-Center.git
 uv venv -p python3.12
 ```
 
-3. Run Code
+3. Install require modules
+```
+uv pip sync uv.lock
+```
+
+4. Run Code
 ```
 python main.py
 # or
@@ -22,6 +27,10 @@ uvicorn main:app --host <HOST> --port <port>
 ## Feature and support models
 
 Only list tested models.
+
+- [Text to Text]
+  
+     - [Qwen/Qwen3-1.7B](https://huggingface.co/Qwen/Qwen3-1.7B) 
 
 - [Text to Image]
 
