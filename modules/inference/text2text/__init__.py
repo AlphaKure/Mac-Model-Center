@@ -67,12 +67,15 @@ class Text2TextInference:
             top_p= params.topP,
             stream= True,
             max_tokens= params.maxToken
+        
         )
 
         async def streamer(generator):
             async for chunk in generator:
-                content = chunk.choices[0].delta.content
-                if content:
-                    yield content
+                try:
+                    yield chunk.choices[0].delta.reasoning
+                except:
+                    if chunk.choices[0].delta.content:
+                        yield chunk.choices[0].delta.content
 
         return 200, streamer(generator), None 
