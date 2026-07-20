@@ -1,16 +1,13 @@
-from typing import Literal
+from schemas.convert import ConvertArgForMLX
 
 from mlx_lm import convert
 
 
-def quantize_llm_to_mlx(
-        modelPath: str,
-        outputPath: str,
-        precision: Literal["bfloat16", "int8", "int4", "mxfp4", "mxfp8", "nvfp4"],
-        dtype: str = "bfloat16"
+def llm_quantize_to_mlx(
+    args: ConvertArgForMLX,
 ):
 
-    match precision:
+    match args.precision:
         
         case "bfloat16":
             quantize = False
@@ -47,17 +44,10 @@ def quantize_llm_to_mlx(
 
 
     convert(
-        hf_path= modelPath,
-        mlx_path= outputPath,
+        hf_path= args.modelPath,
+        mlx_path= args.outputPath,
         quantize= quantize,
         q_bits= qBit,
         q_mode= qMode, # type: ignore
-        dtype= dtype
-    )
-
-if __name__ == "__main__":
-    quantize_llm_to_mlx(
-        modelPath= "/Users/alpha/model/Qwen3-4B-Thinking-2507",
-        outputPath= "/Users/alpha/model/Qwen3-4B-Thinking-2507-mlx-8bits",
-        precision= "int8"
+        dtype= args.dtype
     )
